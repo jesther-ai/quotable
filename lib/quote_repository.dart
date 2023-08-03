@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 
 import 'models/qoute.dart';
 import 'models/quotes_response/quotes_response.dart';
+import 'package:socket_io_client/socket_io_client.dart' as io;
 
 class QuoteRepository {
 // =================================================================
@@ -14,6 +15,43 @@ class QuoteRepository {
     required int page,
     required int limit,
   }) async {
+    final io.Socket socket = io.io(
+      'https://racerchat.wfadev.cloud:80',
+      io.OptionBuilder()
+          .enableForceNew()
+          .setTransports([
+            'websocket',
+            'polling',
+          ])
+          .setQuery({
+            'token': '6099af39d4141',
+          })
+          .setPath('')
+          .enableAutoConnect()
+          .build(),
+    );
+    print('exec');
+    print(socket.flags);
+    print(socket.io.uri);
+    print(socket.io.options);
+    print(socket.io.engine.uri);
+    print(socket.io.engine.path);
+    socket.connect();
+    socket.onConnect((data) {
+      print('Success COnnect');
+      socket.on(
+        'connect',
+        (data) => print('connect: $data'),
+      );
+    });
+
+    socket.onConnectError(
+      (data) {
+        print('Error=> $data');
+        socket.dispose();
+      },
+    );
+
     final uri = Uri(
       scheme: 'https',
       host: 'api.quotable.io',
